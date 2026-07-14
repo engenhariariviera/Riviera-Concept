@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Elevadores OTIS - Riviera Empreendimentos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #1e293b;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-left p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .header-right {
+            text-align: right;
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
+            padding-left: 40px;
+        }
+
+        .header-right h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .header-info strong {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        /* MAIN CONTENT */
+        .content {
+            padding: 40px;
+        }
+
+        /* SEÇÃO DE INDICADORES */
+        .indicators-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .indicator-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-left: 5px solid #1e40af;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .indicator-card.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .indicator-card.success {
+            border-left-color: #10b981;
+        }
+
+        .indicator-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .indicator-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .indicator-card.warning .indicator-value {
+            color: #f59e0b;
+        }
+
+        .indicator-card.success .indicator-value {
+            color: #10b981;
+        }
+
+        .indicator-detail {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        /* GRÁFICOS */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        /* GANTT */
+        .gantt-section {
+            margin-bottom: 40px;
+        }
+
+        .gantt-container {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .gantt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .gantt-table th {
+            background: #1e40af;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .gantt-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .gantt-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .gantt-bar-container {
+            background: #e2e8f0;
+            border-radius: 4px;
+            height: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gantt-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .gantt-bar:hover {
+            filter: brightness(1.1);
+        }
+
+        .gantt-bar.completed {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        }
+
+        .gantt-bar.in-progress {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .gantt-bar.marco {
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+            width: 2px !important;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 30px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .footer-section strong {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .footer-section {
+            opacity: 0.9;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 1200px) {
+            .header {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .header-right {
+                border-left: none;
+                border-top: 2px solid rgba(255, 255, 255, 0.3);
+                padding-left: 0;
+                padding-top: 20px;
+                text-align: left;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .footer {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .indicators-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .footer {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <h1>ELEVADORES OTIS 3 E 4</h1>
+                <p><strong>Projeto:</strong> Riviera Concept - Edifício Comercial</p>
+                <p><strong>Frente 2:</strong> Instalação de Elevadores</p>
+                <p><strong>Status:</strong> Em Execução</p>
+            </div>
+            <div class="header-right">
+                <h3>Dados Técnicos</h3>
+                <div class="header-info">
+                    <div>
+                        <strong>CNPJ:</strong>
+                        10.225.468/0001-38
+                    </div>
+                    <div>
+                        <strong>Responsável:</strong>
+                        Eng. Rômulo Bonfim
+                    </div>
+                    <div>
+                        <strong>CREA SC:</strong>
+                        178635-6
+                    </div>
+                    <div>
+                        <strong>Data Atualização:</strong>
+                        14/07/2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="content">
+            <!-- INDICADORES -->
+            <div class="indicators-section">
+                <h2 class="section-title">📊 Indicadores Principais — Frente 2</h2>
+                <div class="indicators-grid">
+                    <div class="indicator-card success">
+                        <div class="indicator-label">Progresso Físico</div>
+                        <div class="indicator-value">15%</div>
+                        <div class="indicator-detail">B1 Metálica: 100% | Demais etapas: 0%</div>
+                    </div>
+                    <div class="indicator-card warning">
+                        <div class="indicator-label">Atraso Identificado</div>
+                        <div class="indicator-value">16 dias</div>
+                        <div class="indicator-detail">B1 — Instalações Metálicas</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Prazo Total</div>
+                        <div class="indicator-value">243 dias</div>
+                        <div class="indicator-detail">Início: 12/06/2026 | Término: Março/2027</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Próximo Marco</div>
+                        <div class="indicator-value">21/07</div>
+                        <div class="indicator-detail">Vistoria OTIS — Validação Etapa B1</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Equipes Ativas</div>
+                        <div class="indicator-value">8</div>
+                        <div class="indicator-detail">Ferrari, B. Vertical, OTIS, VS Gesso, Carlos, Top Climatização, UNION, Jojô</div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-label">Caminho Crítico</div>
+                        <div class="indicator-value">B1→B3/B4</div>
+                        <div class="indicator-detail">Civil + Elétrica em paralelo (85 dias)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS CURVA S -->
+            <div class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-title">Curva S — Progresso Físico Planejado vs Realizado</div>
+                    <div class="chart-wrapper">
+                        <canvas id="curvaSChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Curva S — Progresso Acumulado Planejado vs Realizado</div>
+                    <div class="chart-wrapper">
+                        <canvas id="curvaAcumuladaChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICO GANTT -->
+            <div class="gantt-section">
+                <h2 class="section-title">📅 Cronograma de Execução — Elevadores OTIS</h2>
+                <div class="gantt-container">
+                    <table class="gantt-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 200px;">Atividade</th>
+                                <th style="width: 100px;">Início</th>
+                                <th style="width: 100px;">Término</th>
+                                <th style="width: 60px;">Dias</th>
+                                <th style="width: 400px;">Cronograma</th>
+                                <th style="width: 80px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>B1 — Instalações Metálicas</strong></td>
+                                <td>12/06/26</td>
+                                <td>15/07/26</td>
+                                <td>34</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar completed" style="width: 100%;">100%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #10b981; font-weight: 600;">✓ Concluído</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>🎯 Vistoria OTIS (Marco)</strong></td>
+                                <td>21/07/26</td>
+                                <td>21/07/26</td>
+                                <td>1</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar marco" style="width: 2%;"></div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #8b5cf6; font-weight: 600;">🎯 Marco</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B3 — Obras Civis</strong></td>
+                                <td>31/07/26</td>
+                                <td>07/10/26</td>
+                                <td>85</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B4 — Infraestrutura Elétrica</strong></td>
+                                <td>03/08/26</td>
+                                <td>07/08/26</td>
+                                <td>5</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Montagem das Cabines (OTIS)</strong></td>
+                                <td>13/10/26</td>
+                                <td>29/12/26</td>
+                                <td>78</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B6 — Fechamento em Gesso</strong></td>
+                                <td>18/10/26</td>
+                                <td>15/12/26</td>
+                                <td>81</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Portas de Alumínio (17º)</strong></td>
+                                <td>16/12/26</td>
+                                <td>16/12/26</td>
+                                <td>1</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Desmobilização / Tapumes</strong></td>
+                                <td>17/12/26</td>
+                                <td>24/12/26</td>
+                                <td>8</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B7.1 — Piso Vinílico</strong></td>
+                                <td>17/12/26</td>
+                                <td>22/01/27</td>
+                                <td>37</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B7.2 — Pintura Geral</strong></td>
+                                <td>17/12/26</td>
+                                <td>31/01/27</td>
+                                <td>45</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B7.3 — Rodapés</strong></td>
+                                <td>25/01/27</td>
+                                <td>06/02/27</td>
+                                <td>12</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B7.4 — Testes de Máquinas</strong></td>
+                                <td>08/02/27</td>
+                                <td>12/02/27</td>
+                                <td>5</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B7.5 — Limpeza Técnica</strong></td>
+                                <td>15/02/27</td>
+                                <td>19/02/27</td>
+                                <td>5</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar" style="width: 0%;">0%</div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #f59e0b; font-weight: 600;">⏳ Pendente</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>🏁 ENTREGA FINAL</strong></td>
+                                <td>—</td>
+                                <td>Março/27</td>
+                                <td>—</td>
+                                <td>
+                                    <div class="gantt-bar-container">
+                                        <div class="gantt-bar marco" style="width: 2%;"></div>
+                                    </div>
+                                </td>
+                                <td><span style="color: #8b5cf6; font-weight: 600;">🎯 Marco</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-section">
+                <strong>Empresa</strong>
+                Riviera Empreendimentos Imobiliários<br>
+                CNPJ: 10.225.468/0001-38<br>
+                Avenida Osvaldo Reis, 3385
+            </div>
+            <div class="footer-section">
+                <strong>Responsável Técnico</strong>
+                Eng. Rômulo Bonfim<br>
+                CREA SC: 178635-6<br>
+                Especialista em Gestão de Obras
+            </div>
+            <div class="footer-section">
+                <strong>Informações</strong>
+                Data de Atualização: 14/07/2026<br>
+                Próxima Revisão: 31/07/2026<br>
+                Dashboard v3.0 — Elevadores OTIS
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS PARA GRÁFICOS -->
+    <script>
+        // Curva S Física (Mensal)
+        const ctxCurvaS = document.getElementById('curvaSChart').getContext('2d');
+        new Chart(ctxCurvaS, {
+            type: 'line',
+            data: {
+                labels: ['Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'],
+                datasets: [
+                    {
+                        label: 'Planejado',
+                        data: [15, 25, 35, 50, 65, 75, 85, 92, 97, 100],
+                        borderColor: '#1e40af',
+                        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#1e40af',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Realizado',
+                        data: [15, 15, null, null, null, null, null, null, null, null],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: 'bold' },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Curva S Acumulada
+        const ctxCurvaAcumulada = document.getElementById('curvaAcumuladaChart').getContext('2d');
+        new Chart(ctxCurvaAcumulada, {
+            type: 'line',
+            data: {
+                labels: ['Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'],
+                datasets: [
+                    {
+                        label: 'Planejado Acumulado',
+                        data: [15, 40, 75, 125, 190, 265, 350, 442, 539, 639],
+                        borderColor: '#1e40af',
+                        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#1e40af',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Realizado Acumulado',
+                        data: [15, 30, null, null, null, null, null, null, null, null],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: 'bold' },
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' dias';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
